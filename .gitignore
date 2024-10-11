@@ -36,6 +36,6 @@ staticfiles/
 Thumbs.db
 
 # Python virtual environment
-venv/
+tsis1/venv/
 .env/
 env/
