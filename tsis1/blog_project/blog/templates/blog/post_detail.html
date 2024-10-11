@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div>
+<a href="{% url 'post_list' %}">Posts</a>
+<a href="{% url 'home' %}">Home</a>
+</div>
+<h1>{{ post.title }}</h1>
+<p>By {{ post.author }} on {{ post.created_at }}</p>
+<p>{{ post.content }}</p>
+
+<h2>Comments</h2>
+<ul>
+    {% for comment in comments %}
+        <li><strong>{{ comment.author }}:</strong> {{ comment.content }} ({{ comment.created_at }})</li>
+    {% empty %}
+        <li>No comments yet.</li>
+    {% endfor %}
+</ul>
+
+{% if "/comment/" in request.path %}
+<h3>Add a Comment:</h3>
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Comment</button>
+</form>
+{% endif %}
+
+{% endblock %}

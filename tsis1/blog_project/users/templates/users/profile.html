@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Profile of {{ user.username }}</h1>
+<img src="{{ user.profile.profile_picture.url }}" alt="Profile Picture">
+<p>{{ user.profile.bio }}</p>
+
+{% if user.following.all %}
+    <h2>Following</h2>
+    {% for follow in user.following.all %}
+        <p>{{ follow.following.username }}</p>
+    {% endfor %}
+{% endif %}
+
+{% if user.followers.all %}
+    <h2>Followers</h2>
+    {% for follow in user.followers.all %}
+        <p>{{ follow.follower.username }}</p>
+    {% endfor %}
+{% endif %}
+{% endblock %}
