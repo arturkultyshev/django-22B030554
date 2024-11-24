@@ -14,26 +14,42 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
-
+from courses.views import CourseListView
 from django.contrib import admin
 from django.urls import path, include
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from students.urls import urlpatterns as students_urls
-from attendance.urls import urlpatterns as attendance_urls
+from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import routers
+from students.views import StudentListView
+
+router = routers.DefaultRouter()
+router.register(r'students', StudentListView)
+router.register(r'courses', CourseListView)
+
+schema_view = get_schema_view(
+    openapi.Info(
+        title="Student Management API",
+        default_version='v1',
+        description="API documentation for the Student Management System",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="support@studentmanagement.com"),
+        license=openapi.License(name="MIT License"),
+    ),
+    public=True,
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('auth/', include('djoser.urls')),
-    path('auth/', include('djoser.urls.jwt')),
-    path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
-    path(
-        "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="api-schema"),
-        name="api-docs",
-    )
-]
+    path('api/users/', include('users.urls')),
+    path('api/students/', include('students.urls')),
+    path('api/courses/', include('courses.urls')),
+    path('api/grades/', include('grades.urls')),
+    path('api/attendance/', include('attendance.urls')),
+    path('api/notifications/', include('notifications.urls')),
 
-urlpatterns += students_urls
-urlpatterns += attendance_urls
+    path('api/auth/', include('djoser.urls')),
+    path('api/auth/', include('djoser.urls.jwt')),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/analytics/', include('analytics.urls')),
+]

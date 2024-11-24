@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'grades',
     'attendance',
     'notifications',
+    'analytics'
 ]
 
 MIDDLEWARE = [
@@ -142,7 +143,8 @@ CACHES = {
         'LOCATION': 'redis://127.0.0.1:6379/1',
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
+        },
+        'TIMEOUT': 300,
     }
 }
 
@@ -167,14 +169,40 @@ LOGGING = {
 }
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
-    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'user': '5/minute',
+    }
 }
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_TIMEZONE = 'UTC'
+
+CELERY_BEAT_SCHEDULE = {
+    'daily_attendance_reminder': {
+        'task': 'notifications.tasks.daily_attendance_reminder',
+        'schedule': 86400.0,
+    },
+    'weekly_grade_summary': {
+        'task': 'notifications.tasks.weekly_grade_summary',
+        'schedule': 604800.0,
+    },
+}
 
 DJOSER = {
     'SERIALIZERS': {
@@ -189,3 +217,11 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.IsAdminUser'],
     },
 }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'test@gmail.com'
+EMAIL_HOST_PASSWORD = 'admin123'
+DEFAULT_FROM_EMAIL = 'no-reply@yourdomain.com'
